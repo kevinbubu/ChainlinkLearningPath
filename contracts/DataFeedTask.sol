@@ -19,25 +19,56 @@ contract DataFeedTask {
      * 查看 aggregator 的地址 https://docs.chain.link/docs/ethereum-addresses/#Goerli%20Testnet 
      * （使用 goerli 网络，Rinkeby 和 Kovan 已经 deprecated）
      *  */
-    constructor() {}
+    constructor() {
+        linkPriceFeed = AggregatorV3Interface(0x48731cF7e84dc94C5f84577882c14Be11a5B7456);
+        btcPriceFeed = AggregatorV3Interface(0xA39434A63A52E749F02807ae27335515BA4b07F7);
+        ethPriceFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);
+    }
 
     /**
      * 步骤 2 - 完成 getLinkPrice 函数 
      * 获得 link/usd 的价格数据
      */
-    function getLinkPrice() public view returns (int256) {}
+    function getLinkPrice() public view returns (int256) {
+        (
+            /*uint80 roundID*/,
+            int price,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = linkPriceFeed.latestRoundData();
+        return price;
+    }
 
     /**
      * 步骤 3 - 完成 getBtcPrice 函数
      * 获得 btc/usd 的价格数据
      */    
-    function getBtcPrice() public view returns (int256) {}
+    function getBtcPrice() public view returns (int256) {
+        (
+            /*uint80 roundID*/,
+            int price,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = btcPriceFeed.latestRoundData();
+        return price;
+    }
 
     /**
      * 步骤 4 - 完成 getEthPrice 函数
      * 获得 eth/usd 的价格数据
      */
-    function getEthPrice() public view returns (int256) {}
+    function getEthPrice() public view returns (int256) {
+        (
+            /*uint80 roundID*/,
+            int price,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = ethPriceFeed.latestRoundData();
+        return price;
+    }
 
     /**
      * 步骤 5 - 通过 Remix 将合约部署合约（使用 goerli 网络）
