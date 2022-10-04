@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: SEE LICENSE IN LICENSE
+// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.0;
 
-import '@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol';
+import "https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 
 /*
  * 任务 3 内容，在合约中维持一个数组，记录 10 个账户的余额
@@ -17,13 +18,21 @@ contract KeepersTask is KeeperCompatibleInterface {
      * 步骤 1 - 在构造函数中初始化数组 balances
      * 将 balances 中的数值初始化为最小值
      */
-    constructor() {}
+    constructor() {
+        for(uint256 i = 0; i < balances.length; i++) {
+            balances[i] = LIMIT;
+        }
+    }
 
     /*
      * 步骤 2 - 定义 withdraw 函数
      * 使得用户可以通过 withdraw 函数改变数组中的余额
      */
-    function withdraw(uint256 amount, uint256[] memory indexes) public {}   
+    function withdraw(uint256 amount, uint256[] memory indexes) public {
+        for(uint256 i = 0; i < indexes.length; i++) {
+            balances[indexes[i]] -= amount;
+        }
+    }   
 
 
     /* 
@@ -34,7 +43,28 @@ contract KeepersTask is KeeperCompatibleInterface {
     function checkUpkeep(
         bytes calldata /* checkData */
     ) external view override returns (bool upkeepNeeded, bytes memory performData) {
+        upkeepNeeded = false;
 
+        uint256 count = 0;
+        uint256 indexCount = 0;
+
+        for(uint256 i = 0; i < balances.length; i++) {
+            if(balances[i] < LIMIT){
+                upkeepNeeded = true;
+                count++;
+            }
+        }
+
+        uint256[] memory indexToUpdate = new uint256[](count);
+        for(uint256 i = 0; i < balances.length; i++) {
+            if(balances[i] < LIMIT) {
+                indexToUpdate[indexCount] = i;
+                indexCount++;
+            }
+        }
+
+        performData = abi.encode(indexToUpdate);
+        return (upkeepNeeded, performData);
     }
 
     /* 
@@ -43,9 +73,12 @@ contract KeepersTask is KeeperCompatibleInterface {
      * 注意可以通过 performData 使用 checkUpkeep 的运算结果，减少 gas 费用
      */
     function performUpkeep(
-        bytes calldata /* performData */
+        bytes calldata performData
     ) external override {
-    
+        uint256[] memory indexToUpdate = abi.decode(performData, (uint256[]));
+        for(uint256 i = 0; i < indexToUpdate.length; i++) {
+            balances[indexToUpdate[i]] = LIMIT;
+        }
     }
 
     /**
